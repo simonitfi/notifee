@@ -5,9 +5,6 @@ buildscript {
     google()
     mavenCentral()
   }
-  dependencies {
-    classpath 'com.android.tools.build:gradle:7.0.3'
-  }
 }
 
 apply plugin: 'com.android.library'
@@ -39,6 +36,7 @@ ext {
 
 android {
   compileSdkVersion 34
+  namespace 'app.notifee.core'
   testOptions {
     unitTests.returnDefaultValues = true
   }
@@ -70,7 +68,6 @@ android {
       minifyEnabled true
       debuggable false
       jniDebuggable false
-      zipAlignEnabled true
       proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
     }
   }
