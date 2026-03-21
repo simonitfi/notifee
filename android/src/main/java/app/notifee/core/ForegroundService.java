@@ -18,6 +18,7 @@ package app.notifee.core;
  */
 
 import android.annotation.SuppressLint;
+import android.app.ForegroundServiceStartNotAllowedException;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -55,11 +56,22 @@ public class ForegroundService extends Service {
     intent.putExtra("notification", notification);
     intent.putExtra("notificationBundle", notificationBundle);
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      ContextHolder.getApplicationContext().startForegroundService(intent);
-    } else {
-      // TODO test this on older device
-      ContextHolder.getApplicationContext().startService(intent);
+    try {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        ContextHolder.getApplicationContext().startForegroundService(intent);
+      } else {
+        ContextHolder.getApplicationContext().startService(intent);
+      }
+    } catch (Exception e) {
+      // On Android 12+, ForegroundServiceStartNotAllowedException is thrown when
+      // the OS denies the foreground service start (e.g. app no longer in a
+      // high-priority state). Swallow gracefully instead of crashing.
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+          && e instanceof ForegroundServiceStartNotAllowedException) {
+        Logger.w(TAG, "Foreground service start not allowed by OS: " + e.getMessage());
+      } else {
+        throw e;
+      }
     }
   }
 
